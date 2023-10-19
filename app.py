@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import sqlite3
+import json
 
 app = Flask(__name__)
 DATABASE = "data.db"
@@ -27,7 +28,23 @@ def get_users():
     cursor.execute("SELECT * FROM tb_user")
     items = cursor.fetchall()
     connection.close()
-    return jsonify({'items': items})
+    
+    #converte para objetos  
+    users = []
+    for item in items:
+        user = {
+            "id": item[0],
+            "username": item[1],
+            "password": item[2],
+            "icon": item[3],
+            "coins": item[4],
+            "level": item[5],
+            "xp": item[6]
+        }
+        users.append(user)
+
+    #retorna em json
+    return json.dumps(users)
 
 
 @app.route('/items', methods=['POST'])
