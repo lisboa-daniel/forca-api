@@ -20,6 +20,16 @@ def get_items():
     connection.close()
     return jsonify({'items': items})
 
+@app.route('/api/user', methods=['GET'])
+def get_users():
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM tb_user")
+    items = cursor.fetchall()
+    connection.close()
+    return jsonify({'items': items})
+
+
 @app.route('/items', methods=['POST'])
 def add_item():
     data = request.get_json()
@@ -33,5 +43,5 @@ def add_item():
     return jsonify({'message': 'Item added successfully'})
 
 if __name__ == '__main__':
-    create_table()
+    #create_table()
     app.run(debug=True)
