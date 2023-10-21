@@ -5,6 +5,65 @@ import json
 app = Flask(__name__)
 DATABASE = "data.db"
 
+
+conn = sqlite3.connect('data.db')
+cursor = conn.cursor()
+
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+
+        cursor.execute(f"""SELECT * 
+                           FROM tb_user 
+                           WHERE username='{username}' 
+                           AND password='{password}'""")
+
+        user = cursor.fetchone()
+
+        if user:
+            return jsonify({"message": "Login Successful"}), 200
+        else:
+            return jsonify({"error": "Invalid username or password"}), 401
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    try:
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+    
+        cursor.execute(f"""SELECT * 
+                           FROM tb_user 
+                           WHERE username='{username}'
+                           """)
+        user = cursor.fetchone()
+
+        if user:
+            return jsonify({"message": "User already exists"}), 200
+        else:
+            cursor.execute(
+                f"""INSERT INTO tb_user (username,
+                                        password, 
+                                        icon, 
+                                        coins, 
+                                        level, 
+                                        xp)
+                    VALUES ('{username}',
+                            '{password}',
+                            '0',0,0,0)""")
+            return jsonify({"message": "User Successfully Registered"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def create_table():
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
@@ -45,6 +104,8 @@ def get_users():
 
     #retorna em json
     return json.dumps(users)
+
+
 
 
 @app.route('/items', methods=['POST'])
