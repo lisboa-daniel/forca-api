@@ -6,12 +6,13 @@ app = Flask(__name__)
 DATABASE = "data.db"
 
 
-conn = sqlite3.connect('data.db')
-cursor = conn.cursor()
 
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    conn = sqlite3.connect('data.db')
+    cursor = conn.cursor()
+
     try:
         data = request.get_json()
         username = data['username']
@@ -34,6 +35,8 @@ def login():
 
 @app.route('/api/register', methods=['POST'])
 def register():
+    conn = sqlite3.connect('data.db')
+    cursor = conn.cursor()
     try:
         data = request.get_json()
         username = data['username']
