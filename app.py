@@ -45,7 +45,6 @@ def register():
         user = cursor.fetchone()
 
         if user:
-            conn.close()  # Close the connection before returning
             return jsonify({"message": "User already exists"}), 200
         else:
             cursor.execute(
@@ -58,16 +57,9 @@ def register():
                     VALUES ('{username}',
                             '{password}',
                             '0',0,0,0)""")
-            conn.commit()  # Commit the changes
-            conn.close()  # Close the connection
+            conn.commit()
             return jsonify({"message": "User Successfully Registered"}), 200
-
-    except sqlite3.Error as e:
-        conn.rollback()  # Roll back the changes
-        conn.close()  # Close the connection
-        return jsonify({"error": str(e)}), 500
     except Exception as e:
-        conn.close()  # Close the connection
         return jsonify({"error": str(e)}), 500
 
 
