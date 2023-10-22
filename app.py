@@ -6,12 +6,12 @@ app = Flask(__name__)
 DATABASE = "data.db"
 
 
+conn = sqlite3.connect('bd.db', check_same_thread=False)
+cursor = conn.cursor()
 
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    conn = sqlite3.connect('data.db')
-    cursor = conn.cursor()
 
     try:
         data = request.get_json()
@@ -35,8 +35,6 @@ def login():
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    conn = sqlite3.connect('data.db')
-    cursor = conn.cursor()
     try:
         data = request.get_json()
         username = data['username']
@@ -61,10 +59,11 @@ def register():
                     VALUES ('{username}',
                             '{password}',
                             '0',0,0,0)""")
+            conn.commit()
             return jsonify({"message": "User Successfully Registered"}), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 def create_table():
