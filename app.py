@@ -105,6 +105,30 @@ def get_users():
     #retorna em json
     return json.dumps(users)
 
+@app.route('/api/userbynick/<string:username>', methods=['GET'])
+def get_userbynick(username):
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM tb_user WHERE username=?", (username,))
+    item = cursor.fetchone()
+    connection.close()
+
+    # Check if the user exists
+    if item:
+        user = {
+            "id": item[0],
+            "username": item[1],
+            "password": item[2],
+            "icon": item[3],
+            "coins": item[4],
+            "level": item[5],
+            "xp": item[6]
+        }
+        # Return the user as JSON
+        return json.dumps(user)
+    else:
+        # If the user doesn't exist, return an appropriate error message
+        return json.dumps({"error": "User not found"})
 
 
 
