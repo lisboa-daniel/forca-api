@@ -5,12 +5,13 @@ import json
 app = Flask(__name__)
 DATABASE = "data.db"
 
-conn = sqlite3.connect(DATABASE, check_same_thread=False)
-cursor = conn.cursor()
 
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
+    cursor = conn.cursor()
+
     try:
         data = request.get_json()
         username = data['username']
@@ -33,6 +34,8 @@ def login():
 
 @app.route('/api/register', methods=['POST'])
 def register():
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
+    cursor = conn.cursor()
     try:
         data = request.get_json()
         username = data['username']
@@ -64,14 +67,6 @@ def register():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-def create_table():
-    connection = sqlite3.connect(DATABASE)
-    cursor = connection.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, description TEXT)")
-    connection.commit()
-    connection.close()
 
 @app.route('/items', methods=['GET'])
 def get_items():
@@ -147,5 +142,4 @@ def add_item():
     return jsonify({'message': 'Item added successfully'})
 
 if __name__ == '__main__':
-    #create_table()
     app.run(debug=True)
