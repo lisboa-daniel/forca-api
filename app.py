@@ -22,7 +22,7 @@ def login():
                            AND password='{password}'""")
 
         user = cursor.fetchone()
-
+        conn.close
         if user:
             return jsonify({"message": "Login Successful"}), 200
         else:
@@ -58,7 +58,9 @@ def register():
                             '{password}',
                             '0',0,0,0)""")
             conn.commit()
+            conn.close()
             return jsonify({"message": "User Successfully Registered"}), 200
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
