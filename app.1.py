@@ -1,24 +1,15 @@
 from flask import Flask, request, jsonify
-import psycopg2
+import sqlite3
 import json
 
 app = Flask(__name__)
-DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb"
+DATABASE = "data.db"
 
-# Database connection function
-def connect_db():
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        return conn
-    except psycopg2.Error as e:
-        print(f"Error connecting to the database: {e}")
-        return None
 
-# Update your route functions to use PostgreSQL
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    conn = connect_db()
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
     cursor = conn.cursor()
 
     try:
@@ -26,13 +17,13 @@ def login():
         username = data['username']
         password = data['password']
 
-        cursor.execute("""SELECT * 
-                        FROM tb_user 
-                        WHERE username=%s 
-                        AND password=%s""", (username, password))
+        cursor.execute(f"""SELECT * 
+                           FROM tb_user 
+                           WHERE username='{username}' 
+                           AND password='{password}'""")
 
         user = cursor.fetchone()
-        conn.close()
+        conn.close
         if user:
             return jsonify({"message": "Login Successful"}), 200
         else:
@@ -41,27 +32,34 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# /api/register
 @app.route('/api/register', methods=['POST'])
 def register():
-    conn = connect_db()
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
     cursor = conn.cursor()
     try:
         data = request.get_json()
         username = data['username']
         password = data['password']
     
-        cursor.execute("""SELECT * 
-                        FROM tb_user 
-                        WHERE username=%s""", (username,))
+        cursor.execute(f"""SELECT * 
+                           FROM tb_user 
+                           WHERE username='{username}'
+                           """)
         user = cursor.fetchone()
 
         if user:
             return jsonify({"message": "User already exists"}), 200
         else:
             cursor.execute(
-                """INSERT INTO tb_user (username, password, icon, coins, level, xp)
-                VALUES (%s, %s, %s, %s, %s, %s)""", (username, password, '0', 0, 0, 0))
+                f"""INSERT INTO tb_user (username,
+                                        password, 
+                                        icon, 
+                                        coins, 
+                                        level, 
+                                        xp)
+                    VALUES ('{username}',
+                            '{password}',
+                            '0',0,0,0)""")
             conn.commit()
             conn.close()
             return jsonify({"message": "User Successfully Registered"}), 200
@@ -69,16 +67,25 @@ def register():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# /api/user
+
+@app.route('/items', methods=['GET'])
+def get_items():
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM items")
+    items = cursor.fetchall()
+    connection.close()
+    return jsonify({'items': items})
+
 @app.route('/api/user', methods=['GET'])
 def get_users():
-    conn = connect_db()
-    cursor = conn.cursor()
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
     cursor.execute("SELECT * FROM tb_user")
     items = cursor.fetchall()
-    conn.close()
+    connection.close()
     
-    # Convert to objects  
+    #converte para objetos  
     users = []
     for item in items:
         user = {
@@ -92,17 +99,16 @@ def get_users():
         }
         users.append(user)
 
-    # Return as JSON
+    #retorna em json
     return json.dumps(users)
 
-# /api/userbynick/<string:username>
 @app.route('/api/userbynick/<string:username>', methods=['GET'])
 def get_userbynick(username):
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tb_user WHERE username=%s", (username,))
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM tb_user WHERE username=?", (username,))
     item = cursor.fetchone()
-    conn.close()
+    connection.close()
 
     # Check if the user exists
     if item:
@@ -120,6 +126,20 @@ def get_userbynick(username):
     else:
         # If the user doesn't exist, return an appropriate error message
         return json.dumps({"error": "User not found"})
+
+
+
+@app.route('/items', methods=['POST'])
+def add_item():
+    data = request.get_json()
+    name = data.get('name')
+    description = data.get('description')
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO items (name, description) VALUES (?, ?)", (name, description))
+    connection.commit()
+    connection.close()
+    return jsonify({'message': 'Item added successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)
