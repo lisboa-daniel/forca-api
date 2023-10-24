@@ -141,7 +141,7 @@ def get_userbynick(username):
 
 # INFO PERSONAGEM
 # Character Methods
-@app.route('/api/get_color/', methods=['POST'])
+@app.route('/api/get_color', methods=['POST'])
 def get_color():
     conn = connect_db()
     cursor = conn.cursor()
