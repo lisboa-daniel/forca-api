@@ -3,7 +3,7 @@ import psycopg2
 import json
 
 app = Flask(__name__)
-DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb"
+DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb?options=endpoint%3D[ep-morning-glitter-99273928]&sslmode=require"
 
 # Database connection function
 def connect_db():
@@ -16,30 +16,8 @@ def connect_db():
 
 # Update your route functions to use PostgreSQL
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    conn = connect_db()
-    cursor = conn.cursor()
 
-    try:
-        data = request.get_json()
-        username = data['username']
-        password = data['password']
 
-        cursor.execute("""SELECT * 
-                        FROM tb_user 
-                        WHERE username=%s 
-                        AND password=%s""", (username, password))
-
-        user = cursor.fetchone()
-        conn.close()
-        if user:
-            return jsonify({"message": "Login Successful"}), 200
-        else:
-            return jsonify({"error": "Invalid username or password"}), 401
-        
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # /api/register
 @app.route('/api/register', methods=['POST'])
