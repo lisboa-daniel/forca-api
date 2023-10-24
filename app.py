@@ -3,7 +3,7 @@ import psycopg2
 import json
 
 app = Flask(__name__)
-DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb?options=endpoint%3D[ep-morning-glitter-99273928]&sslmode=require"
+DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb?options=endpoint%3Dep-morning-glitter-99273928&sslmode=require"
 
 # Database connection function
 def connect_db():
