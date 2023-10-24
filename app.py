@@ -117,7 +117,7 @@ def get_userbynick(username):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM tb_user WHERE username=%s", (username,))
     item = cursor.fetchone()
-    conn.close()
+
 
     # Check if the user exists
     if item:
@@ -131,8 +131,27 @@ def get_userbynick(username):
             "xp": item[6],
             "item1": item[7],
             "item2": item[8],
-            "item3": item[9]
+            "item3": item[9],
+            "character": {
+                "color": "",
+                "head": "",
+                "top": "",
+                "bottom": ""
+            }
         }
+        cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
+        item =  cursor.fetchone();
+        
+        
+        user["character"]["color"] = item[0];
+        user["character"]["head"] = item[1];
+        user["character"]["top"] = item[2];
+        user["character"]["bottom"] = item[3];
+    
+        
+        print(user)
+        
+        conn.close()
         # Return the user as JSON
         return jsonify(user)
     else:
