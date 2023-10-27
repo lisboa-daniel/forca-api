@@ -53,7 +53,7 @@ def register():
         data = request.get_json()
         username = data['username']
         password = data['password']
-        color = data.get('color', 'blue')  # Default color is blue if not provided
+        color = data.get('color', 'azul')  # Default color is blue if not provided
 
         cursor.execute("""SELECT * 
                         FROM tb_user 
@@ -180,6 +180,55 @@ def get_color():
             return jsonify({"message": "color not found"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Item Methods
+@app.route('/api/get_items', methods=['GET'])
+def get_items():
+    data = request.get_json()
+    query = f"""SELECT *
+                FROM tb_item
+            """
+    try:
+        cursor.execute(query)
+        items_get = cursor.fetchall()
+        
+        items = []
+
+        for item in items_get:
+            send = {
+                "id": item[0],
+                "name": item[1],
+                "description": item[2],
+                "icon": item[3],
+                "type": item[4]
+   
+            }
+            items.append(send)
+            
+        # Return as JSON
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 404 
+
+
+@app.route('/api/get_item', methods=['POST'])
+def get_item():
+    data = request.get_json()
+    name = data['item_name']
+    query = f"""SELECT name
+                FROM tb_item
+                WHERE name = '{name}'
+            """
+    try:
+        cursor.execute(query)
+        item = cursor.fetchone()
+        if item:
+            item_name = item[0]
+            return jsonify({"message": str(item_name)}), 200
+        else:
+            return jsonify({"message":"item not found"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
 
 @app.route('/api/set_color', methods=['POST'])
 def set_color():
