@@ -45,6 +45,61 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/login2', methods=['POST'])
+def login2():
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    try:
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+
+        cursor.execute("""SELECT * 
+                        FROM tb_user 
+                        WHERE username=%s 
+                        AND password=%s""", (username, password))
+
+        item = cursor.fetchone()
+        
+        
+        if item:
+            user = {
+                "id": item[0],
+                "username": item[1],
+                "password": item[2],
+                "icon": item[3],
+                "coins": item[4],
+                "level": item[5],
+                "xp": item[6],
+                "item1": item[7],
+                "item2": item[8],
+                "item3": item[9],
+                "character": {
+                    "color": "",
+                    "head": "",
+                    "top": "",
+                    "bottom": ""
+                }
+            }
+        cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
+        item =  cursor.fetchone();
+        
+        
+        user["character"]["color"] = item[0];
+        user["character"]["head"] = item[1];
+        user["character"]["top"] = item[2];
+        user["character"]["bottom"] = item[3];
+        
+        conn.close()
+        if user:
+            return jsonify(user), 200
+        else:
+            return jsonify({"error": "Invalid username or password"}), 401
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/register', methods=['POST'])
 def register():
     conn = connect_db()
