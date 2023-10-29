@@ -118,6 +118,26 @@ def register():
         if user:
             return jsonify({"message": "User already exists"}), 200
         else:
+            
+            user = {
+                "id": 0,
+                "username": username,
+                "password": password,
+                "icon": "",
+                "coins": 300,
+                "level": 1,
+                "xp": 0,
+                "item1": "potion",
+                "item2": "lapiseira",
+                "item3": "sopa",
+                "character": {
+                    "color": "azul",
+                    "head": "",
+                    "top": "",
+                    "bottom": ""
+                    }
+                }
+            
             cursor.execute(
                 """INSERT INTO tb_user (username, password, icon, coins, level, xp, item1,item2,item3)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", 
@@ -130,7 +150,7 @@ def register():
             
             conn.commit()
             conn.close()
-            return jsonify({"message": "User and Character Successfully Registered"}), 200
+            return jsonify(user), 201
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
