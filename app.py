@@ -82,15 +82,17 @@ def login2():
                     "bottom": ""
                 }
             }
-        cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
-        item =  cursor.fetchone();
+            cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
+            item =  cursor.fetchone();
         
         
-        user["character"]["color"] = item[0];
-        user["character"]["head"] = item[1];
-        user["character"]["top"] = item[2];
-        user["character"]["bottom"] = item[3];
-        
+            user["character"]["color"] = item[0];
+            user["character"]["head"] = item[1];
+            user["character"]["top"] = item[2];
+            user["character"]["bottom"] = item[3];
+        else:
+            user = None
+            
         conn.close()
         if user:
             return jsonify(user), 200
