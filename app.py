@@ -261,7 +261,6 @@ def get_color():
 # Item Methods
 @app.route('/api/get_storedeals', methods=['GET'])
 def get_items():
-    data = request.get_json()
     query = f"""SELECT s.item_id, i.name, i.description, i.icon, i.type, s.group, s.discount, s.cost
                 FROM tb_store s
                 INNER JOIN tb_item i
@@ -287,7 +286,7 @@ def get_items():
             items.append(send)
             
         # Return as JSON
-        return jsonify(items)
+        return jsonify(items), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
