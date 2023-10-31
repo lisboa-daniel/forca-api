@@ -259,11 +259,13 @@ def get_color():
         return jsonify({"error": str(e)}), 500
 
 # Item Methods
-@app.route('/api/get_items', methods=['GET'])
+@app.route('/api/get_storedeals', methods=['GET'])
 def get_items():
     data = request.get_json()
-    query = f"""SELECT *
-                FROM tb_item
+    query = f"""SELECT s.item_id, i.name, i.description, i.icon, i.type, s.group, s.discount, s.cost
+                FROM tb_store s
+                INNER JOIN tb_item i
+                ON s.item_id = i.id
             """
     try:
         cursor.execute(query)
@@ -273,19 +275,24 @@ def get_items():
 
         for item in items_get:
             send = {
-                "id": item[0],
+                "item_id": item[0],
                 "name": item[1],
                 "description": item[2],
                 "icon": item[3],
-                "type": item[4]
-   
+                "type": item[4],
+                "group": item[5],
+                "discount": item[6],
+                "cost": item[7]
             }
             items.append(send)
             
         # Return as JSON
         return jsonify(items)
     except Exception as e:
-        return jsonify({"error": str(e)}), 404 
+        return jsonify({"error": str(e)}), 404
+
+
+#
 
 
 @app.route('/api/get_item', methods=['POST'])
@@ -324,6 +331,10 @@ def set_color():
         return jsonify({"message": "color updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
