@@ -269,7 +269,7 @@ def get_items():
     try:
         cursor.execute(query)
         items_get = cursor.fetchall()
-        
+        cursor.close()
         items = []
 
         for item in items_get:
@@ -284,7 +284,7 @@ def get_items():
                 "cost": item[7]
             }
             items.append(send)
-            
+      
         # Return as JSON
         return jsonify(items), 200
     except Exception as e:
