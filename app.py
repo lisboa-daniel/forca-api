@@ -269,7 +269,7 @@ def get_items():
     try:
         cursor.execute(query)
         items_get = cursor.fetchall()
-        cursor.close()
+        
         items = []
 
         for item in items_get:
