@@ -77,17 +77,17 @@ def login2():
                 "item3": item[9],
                 "character": {
                     "color": "",
-                    "head": "",
+                    "accessory": "",
                     "top": "",
                     "bottom": ""
                 }
             }
-            cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
+            cursor.execute("SELECT color,accessory,top,bottom FROM tb_character WHERE username=%s", (username,))
             item =  cursor.fetchone();
         
         
             user["character"]["color"] = item[0];
-            user["character"]["head"] = item[1];
+            user["character"]["accessory"] = item[1];
             user["character"]["top"] = item[2];
             user["character"]["bottom"] = item[3];
         else:
@@ -134,7 +134,7 @@ def register():
                 "item3": "sopa",
                 "character": {
                     "color": "azul",
-                    "head": "",
+                    "accessory": "",
                     "top": "",
                     "bottom": ""
                     }
@@ -146,7 +146,7 @@ def register():
                 (username, password, '0', 300, 1, 0,"potion","lapiseira","sopa"))
             
             cursor.execute(
-                """INSERT INTO tb_character (username, color, head, top, bottom)
+                """INSERT INTO tb_character (username, color, accessory, top, bottom)
                 VALUES (%s, %s, %s, %s, %s)""", 
                 (username, color, 'default', 'default', 'default'))
             
@@ -211,17 +211,17 @@ def get_userbynick(username):
             "item3": item[9],
             "character": {
                 "color": "",
-                "head": "",
+                "accessory": "",
                 "top": "",
                 "bottom": ""
             }
         }
-        cursor.execute("SELECT color,head,top,bottom FROM tb_character WHERE username=%s", (username,))
+        cursor.execute("SELECT color,accessory,top,bottom FROM tb_character WHERE username=%s", (username,))
         item =  cursor.fetchone();
         
         
         user["character"]["color"] = item[0];
-        user["character"]["head"] = item[1];
+        user["character"]["accessory"] = item[1];
         user["character"]["top"] = item[2];
         user["character"]["bottom"] = item[3];
     
