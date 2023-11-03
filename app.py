@@ -45,6 +45,9 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
+
 @app.route('/api/login2', methods=['POST'])
 def login2():
     conn = connect_db()
@@ -297,7 +300,7 @@ def get_items():
 
 #
 
-
+# INFO FROM ITEM
 @app.route('/api/get_item', methods=['POST'])
 def get_item():
     data = request.get_json()
@@ -337,6 +340,40 @@ def set_color():
 
 
 
+# INFO FROM ITEM ON INVENTORY
+@app.route('/api/get_item_inventory', methods=['POST'])
+def get_item_from_inventory():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    item = data['item']
+    query = f"""WITH temp AS (
+                    SELECT tinv.id AS inventory_item_id, 
+                           ti.name AS item_name,
+                           ti.description,
+                           ti.icon,
+                           ti.type,
+                           tinv.amount,
+                           tu.username
+                    FROM tb_item AS ti
+                    JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
+                    JOIN tb_user AS tu ON tu.id = tinv.user_id
+                    WHERE ti.icon = '{item}' 
+                    AND tu.username = '{username}'
+                )
+                SELECT *
+                FROM temp
+             """
+    try:
+        cursor.execute(query)
+        item_array = cursor.fetchone() 
+        cursor.close()  
+        return jsonify({"message": str(item_array)}), 200
+          
+    except Exception as e:
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -666,7 +666,7 @@ def get_item_from_inventory():
     username = data['username']
     item = data['item']
     query = f"""WITH 'temp' AS (SELECT tinv.id AS inventory_item_id , 
-                                      ti.name AS item_name,
+                                      ti.icon AS item_name,
                                       ti.description, ti.icon,
                                       ti.type, tinv.amount, tu.username
                                 FROM tb_item AS ti
