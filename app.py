@@ -341,13 +341,11 @@ def set_color():
 
 
 # INFO FROM ITEM ON INVENTORY
-@app.route('/api/get_item_inventory', methods=['POST'])
-def get_item_from_inventory():
+@app.route('/api/get_item_inventory/<username>/<item_name>', methods=['GET'])
+def get_item_from_inventory(username, item_name):
     conn = connect_db()
     cursor = conn.cursor()
-    data = request.get_json()
-    username = data['username']
-    item = data['item']
+    
     query = f"""WITH temp AS (
                     SELECT tinv.id AS inventory_item_id, 
                            ti.name AS item_name,
@@ -359,7 +357,7 @@ def get_item_from_inventory():
                     FROM tb_item AS ti
                     JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
                     JOIN tb_user AS tu ON tu.id = tinv.user_id
-                    WHERE ti.icon = '{item}' 
+                    WHERE ti.icon = '{item_name}' 
                     AND tu.username = '{username}'
                 )
                 SELECT *
@@ -368,12 +366,24 @@ def get_item_from_inventory():
     try:
         cursor.execute(query)
         item_array = cursor.fetchone() 
+        
+        response = {
+            "inventory_item_id": item_array[0],
+            "item_name": item_array[1],
+            "description": item_array[2],
+            "icon": item_array[3],
+            "type": item_array[4],
+            "amount": item_array[5],
+            "username": item_array[6]
+        }
+        
         cursor.close()  
-        return jsonify({"message": str(item_array)}), 200
+        return jsonify(response), 200
           
     except Exception as e:
         cursor.close()
         return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':
