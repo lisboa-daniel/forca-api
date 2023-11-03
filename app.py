@@ -402,7 +402,11 @@ def inventory_create():
                                FROM tb_item 
                                WHERE name = '{item_name}' 
                             """
-   
+    coins = data['coins']
+    
+    query_coins = f"""UPDATE tb_user 
+                SET coins = {coins}
+                WHERE username = '{username}'"""
             
     try:
         cursor.execute(user_id_select_query)
@@ -418,6 +422,7 @@ def inventory_create():
                     """
         
         cursor.execute(insert_query)
+        cursor.execute(query_coins)
         conn.commit()
         conn.close()
 
