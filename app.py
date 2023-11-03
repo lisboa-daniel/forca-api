@@ -153,6 +153,38 @@ def register():
                 VALUES (%s, %s, %s, %s, %s)""", 
                 (username, color, 'default', 'default', 'default'))
             
+
+            
+            user_id_select_query = f"""SELECT id
+                           FROM tb_user 
+                           WHERE username = '{username}' 
+                        """
+
+            item_names = ["Poção de cura +1", "Lapiseira", "Sopinha de letras"]
+            try:
+                cursor.execute(user_id_select_query)
+                user_id = str(cursor.fetchone()).strip("(),")
+
+                for item_name in item_names:
+                    item_id_select_query = f"""SELECT id
+                                            FROM tb_item 
+                                            WHERE name = '{item_name}' 
+                                            """
+
+                    cursor.execute(item_id_select_query)
+                    item_id = str(cursor.fetchone()).strip("(),")
+                    insert_query = f""" INSERT INTO tb_inventory (user_id,
+                                                        item_id,
+                                                        amount
+                                                        )
+                                        VALUES ('{user_id}', '{item_id}', 5)
+                                    """
+
+                    cursor.execute(insert_query)
+            
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+            
             conn.commit()
             conn.close()
             return jsonify(user), 201
@@ -337,7 +369,81 @@ def set_color():
         return jsonify({"message": "color updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+#INVENTARIO
 
+@app.route('/api/create_inventory', methods=['POST'])
+def inventory_create():
+    data = request.get_json()
+    username = data['username']
+    item_name = data['item_name']
+    user_id_select_query = f"""SELECT id
+                               FROM tb_user 
+                               WHERE username = '{username}' 
+                            """
+    item_id_select_query = f"""SELECT id
+                               FROM tb_item 
+                               WHERE name = '{item_name}' 
+                            """
+   
+            
+    try:
+        cursor.execute(user_id_select_query)
+        user_id = str(cursor.fetchone()).strip("(),")
+        cursor.execute(item_id_select_query)
+        item_id = str(cursor.fetchone()).strip("(),")
+        
+        insert_query = f""" INSERT INTO tb_inventory (user_id,
+                                                item_id,
+                                                amount
+                                                )
+                        VALUES ('{user_id}', '{item_id}', 1)
+                    """
+        
+        cursor.execute(insert_query)
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message":"Inventory created"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/add_item', methods=['POST'])
+def add_item_inventory():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    item = data['item']
+    query= f""" WITH 'temp' AS (SELECT  tinv.id AS
+                                        inventory_item_id,
+                                        ti.name AS item_name,
+                                        ti.id AS item_id,
+                                        tu.id AS user_id,
+                                        tinv.amount AS item_amount,
+                                        ti.description, ti.icon,
+                                        ti.type, tu.username
+                                FROM tb_item AS ti
+                                JOIN tb_inventory AS tinv
+                                ON ti.id = tinv.item_id
+                                JOIN tb_user AS tu
+                                ON tu.id = tinv.user_id
+                                WHERE item_name = '{item}'
+                                AND username = '{username}'
+                              )
+                UPDATE tb_inventory
+                SET amount = amount + {1}' 
+                FROM temp
+                WHERE tb_inventory.user_id = temp.user_id 
+                AND tb_inventory.item_id = temp.item_id """
+    
+    try:
+        cursor.execute(query)
+        conn.commit()
+        conn.close();
+        return jsonify({"message": "Item comprado"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # INFO FROM ITEM ON INVENTORY
