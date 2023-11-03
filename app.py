@@ -371,6 +371,24 @@ def set_color():
         return jsonify({"error": str(e)}), 500
 #INVENTARIO
 
+
+@app.route('/api/coin_update', methods=['POST'])
+def coin_increment():
+    data = request.get_json()
+    username = data['username']
+    amount = data['amount']
+    query = f"""UPDATE tb_user 
+                SET coins = {amount}
+                WHERE username = '{username}'
+            """
+    try:
+        cursor.execute(query)
+        conn.commit()
+        return jsonify({"message": "Coins updated to"+ str(amount)})       
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/create_inventory', methods=['POST'])
 def inventory_create():
     data = request.get_json()
@@ -414,36 +432,88 @@ def add_item_inventory():
     cursor = conn.cursor()
     data = request.get_json()
     username = data['username']
-    item = data['item']
-    query= f""" WITH 'temp' AS (SELECT  tinv.id AS
-                                        inventory_item_id,
-                                        ti.name AS item_name,
-                                        ti.id AS item_id,
-                                        tu.id AS user_id,
-                                        tinv.amount AS item_amount,
-                                        ti.description, ti.icon,
-                                        ti.type, tu.username
-                                FROM tb_item AS ti
-                                JOIN tb_inventory AS tinv
-                                ON ti.id = tinv.item_id
-                                JOIN tb_user AS tu
-                                ON tu.id = tinv.user_id
-                                WHERE item_name = '{item}'
-                                AND username = '{username}'
-                              )
+    item = data['item_name']
+    query= f""" WITH "temp" AS (
+                    SELECT tinv.id AS inventory_item_id,
+                        ti.name AS name,
+                        ti.id AS item_id,
+                        tu.id AS user_id,
+                        tinv.amount AS item_amount,
+                        ti.description,
+                        ti.icon,
+                        ti.type,
+                        tu.username
+                    FROM tb_item AS ti
+                    JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
+                    JOIN tb_user AS tu ON tu.id = tinv.user_id
+                    WHERE name = '{item}'
+                    AND username = '{username}'
+                )
                 UPDATE tb_inventory
-                SET amount = amount + {1}' 
+                SET amount = amount + '{1}'
                 FROM temp
-                WHERE tb_inventory.user_id = temp.user_id 
-                AND tb_inventory.item_id = temp.item_id """
+                WHERE tb_inventory.user_id = temp.user_id
+                AND tb_inventory.item_id = temp.item_id; """
     
     try:
         cursor.execute(query)
         conn.commit()
-        conn.close();
+        conn.close()
+        return jsonify({"message": "Item adicionado"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+#COMPRA
+@app.route('/api/buy', methods=['POST'])
+def buy():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    item = data['item_name']
+    coins = data['coins']
+    
+    query_coins = f"""UPDATE tb_user 
+                SET coins = {coins}
+                WHERE username = '{username}'
+            """
+    query= f""" WITH "temp" AS (
+                    SELECT tinv.id AS inventory_item_id,
+                        ti.name AS name,
+                        ti.id AS item_id,
+                        tu.id AS user_id,
+                        tinv.amount AS item_amount,
+                        ti.description,
+                        ti.icon,
+                        ti.type,
+                        tu.username
+                    FROM tb_item AS ti
+                    JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
+                    JOIN tb_user AS tu ON tu.id = tinv.user_id
+                    WHERE name = '{item}'
+                    AND username = '{username}'
+                )
+                UPDATE tb_inventory
+                SET amount = amount + '{1}'
+                FROM temp
+                WHERE tb_inventory.user_id = temp.user_id
+                AND tb_inventory.item_id = temp.item_id; """
+    
+    try:
+        cursor.execute(query)
+       
+        
+        cursor.execute(query_coins)
+        conn.commit()
+        
+        
+        conn.close()
         return jsonify({"message": "Item comprado"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 
 # INFO FROM ITEM ON INVENTORY
