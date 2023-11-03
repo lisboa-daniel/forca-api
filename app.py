@@ -374,6 +374,8 @@ def set_color():
 
 @app.route('/api/coin_update', methods=['POST'])
 def coin_increment():
+    conn = connect_db()
+    cursor = conn.cursor()
     data = request.get_json()
     username = data['username']
     amount = data['amount']
