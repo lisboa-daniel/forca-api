@@ -474,7 +474,7 @@ def inventory_create():
         cursor.execute(query_coins)
         conn.commit()
  
-        return jsonify({"message":"Inventory created"}), 200
+        return jsonify({"message":"Inventory created"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
