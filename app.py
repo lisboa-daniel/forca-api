@@ -569,6 +569,56 @@ def buy():
         return jsonify({"error": str(e)}), 500
 
 
+#PEGA INVENTARIO
+@app.route('/api/get_items_inventory_by_type/<username>/<item_type>', methods=['GET'])
+def get_items_by_type_from_inventory(username, item_type):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    item_type_prefix = item_type[0]
+
+    query = f"""WITH temp AS (
+                    SELECT tinv.id AS inventory_item_id, 
+                           ti.name AS item_name,
+                           ti.description,
+                           ti.icon,
+                           ti.type,
+                           tinv.amount,
+                           tu.username
+                    FROM tb_item AS ti
+                    JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
+                    JOIN tb_user AS tu ON tu.id = tinv.user_id
+                    WHERE tu.username = '{username}' 
+                    AND ti.type::text LIKE '{item_type_prefix}%'
+                )
+                SELECT *
+                FROM temp
+             """
+    try:
+        cursor.execute(query)
+        item_array = cursor.fetchall()
+        cursor.close()
+        if item_array:
+            response = []
+            for item in item_array:
+                item_data = {
+                    "inventory_item_id": item[0],
+                    "item_name": item[1],
+                    "description": item[2],
+                    "icon": item[3],
+                    "type": item[4],
+                    "amount": item[5],
+                    "username": item[6]
+                }
+                response.append(item_data)
+            return jsonify(response), 200
+        else:
+            return jsonify({"message": "No user found or the user does not have any items of this type"}), 404
+    except Exception as e:
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 # INFO FROM ITEM ON INVENTORY
