@@ -595,8 +595,9 @@ def get_item_from_inventory(username, item_name):
     try:
         cursor.execute(query)
         item_array = cursor.fetchone() 
-        
-        response = {
+        cursor.close()  
+        if (len(item_array) > 0):
+            response = {
             "inventory_item_id": item_array[0],
             "item_name": item_array[1],
             "description": item_array[2],
@@ -604,10 +605,15 @@ def get_item_from_inventory(username, item_name):
             "type": item_array[4],
             "amount": item_array[5],
             "username": item_array[6]
-        }
+            
+            }
+            return jsonify(response), 200
+        else:
+            return jsonify({"message: Não possui o item"}, 404)
         
-        cursor.close()  
-        return jsonify(response), 200
+    
+        
+        
           
     except Exception as e:
         cursor.close()
