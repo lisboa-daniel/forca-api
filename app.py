@@ -440,6 +440,8 @@ def coin_increment():
 
 @app.route('/api/create_inventory', methods=['POST'])
 def inventory_create():
+    conn = connect_db()
+    cursor = conn.cursor()
     data = request.get_json()
     username = data['username']
     item_name = data['item_name']
