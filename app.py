@@ -371,6 +371,53 @@ def set_color():
         return jsonify({"error": str(e)}), 500
 #INVENTARIO
 
+@app.route('/api/get_costume_inventory/<username>', methods=['GET'])
+def get_costume_inventory(username):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    query = f"""WITH temp AS (
+                    SELECT tinv.id AS inventory_item_id, 
+                        ti.name AS item_name,
+                        ti.description,
+                        ti.icon,
+                        ti.type,
+                        tinv.amount,
+                        tu.username
+                    FROM tb_item AS ti
+                    JOIN tb_inventory AS tinv ON ti.id = tinv.item_id
+                    JOIN tb_user AS tu ON tu.id = tinv.user_id
+                    WHERE ti.type IN (11, 12, 13) 
+                    AND tu.username = '{username}'
+                )
+                SELECT inventory_item_id, item_name, description, icon, type, amount, username
+                FROM temp;
+             """
+    try:
+        cursor.execute(query)
+        item_arrays = cursor.fetchall()
+
+        response = []
+        for item_array in item_arrays:
+            item = {
+                "inventory_item_id": item_array[0],
+                "item_name": item_array[1],
+                "description": item_array[2],
+                "icon": item_array[3],
+                "type": item_array[4],
+                "amount": item_array[5],
+                "username": item_array[6]
+            }
+            response.append(item)
+
+        cursor.close()  
+        return jsonify(response), 200
+          
+    except Exception as e:
+        cursor.close()
+        return jsonify({"error": str(e)}), 500
+
+
 
 @app.route('/api/coin_update', methods=['POST'])
 def coin_increment():
@@ -426,8 +473,7 @@ def inventory_create():
         cursor.execute(insert_query)
         cursor.execute(query_coins)
         conn.commit()
-        conn.close()
-
+ 
         return jsonify({"message":"Inventory created"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
