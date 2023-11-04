@@ -596,7 +596,7 @@ def get_item_from_inventory(username, item_name):
         cursor.execute(query)
         item_array = cursor.fetchone() 
         cursor.close()  
-        if (len(item_array) > 0):
+        if (item_array != None):
             response = {
             "inventory_item_id": item_array[0],
             "item_name": item_array[1],
@@ -609,11 +609,8 @@ def get_item_from_inventory(username, item_name):
             }
             return jsonify(response), 200
         else:
-            return jsonify({"message: Não possui o item"}, 404)
-        
-    
-        
-        
+            return jsonify({"message" : "Não usuário não encontrado ou não possui o item"}), 404
+       
           
     except Exception as e:
         cursor.close()
