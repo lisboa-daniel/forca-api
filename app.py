@@ -369,8 +369,36 @@ def set_color():
         return jsonify({"message": "color updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-#INVENTARIO
+    
+    
+@app.route('/api/update_character', methods=['POST'])
+def update_character():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    color = data['color']
+    top = data['top']
+    bottom = data['bottom']
+    accessory = data['accessory']
 
+    query= """UPDATE tb_character 
+            SET color = %s,
+                top = %s,
+                bottom = %s,
+                accessory = %s
+            WHERE username = %s
+            """
+    try:
+        cursor.execute(query, (color, top, bottom, accessory, username))
+
+        conn.commit()
+        return jsonify({"message": "character updated"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+       
+  
+#INVENTARIO
 @app.route('/api/get_costume_inventory/<username>', methods=['GET'])
 def get_costume_inventory(username):
     conn = connect_db()
