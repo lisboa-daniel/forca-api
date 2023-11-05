@@ -151,7 +151,7 @@ def register():
             cursor.execute(
                 """INSERT INTO tb_character (username, color, accessory, top, bottom)
                 VALUES (%s, %s, %s, %s, %s)""", 
-                (username, color, 'default', 'default', 'default'))
+                (username, color, 'default_accessory', 'default_top', 'default_bottom'))
             
 
             
