@@ -193,6 +193,32 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 
+
+#set de itens equipados
+@app.route('/api/set_items', methods=['POST'])
+def set_items():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    item1 = data['item1']
+    item2 = data['item2']
+    item3 = data['item3']
+
+    query= f"""UPDATE tb_user 
+                SET item1 = '{item1}', 
+                    item2 = '{item2}',
+                    item3 = '{item3}'
+                WHERE username = '{username}'
+            """
+    try:
+        cursor.execute(query)
+        conn.commit()
+        return jsonify({"message": "items updated"}), 200
+    except Exception as e: 
+        return jsonify({"error": str(e)}), 500
+
+
 # /api/user
 @app.route('/api/user', methods=['GET'])
 def get_users():
