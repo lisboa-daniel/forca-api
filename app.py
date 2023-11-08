@@ -395,7 +395,24 @@ def set_color():
         return jsonify({"message": "color updated"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+ 
+@app.route('/api/set_icon', methods=['POST'])
+def set_avatar():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    icon = data['icon']
+    query= """UPDATE tb_user
+              SET icon = %s
+              WHERE username = %s
+            """
+    try:
+        cursor.execute(query, (icon, username))
+        conn.commit()
+        return jsonify({"message": "avatar updated"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500   
     
 @app.route('/api/update_character', methods=['POST'])
 def update_character():
