@@ -640,6 +640,30 @@ def buy():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/useitem', methods=['POST'])
+def useitem():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username']
+    item = data['item_name']
+    
+    query_use_item = f"""UPDATE tb_inventory
+                        SET amount = amount - 1
+                        WHERE user_id = (SELECT id FROM tb_user WHERE username = '{username}')
+                        AND item_id = (SELECT id FROM tb_item WHERE icon = '{item}')
+                        AND amount > 0;
+                    """
+
+    try:
+        cursor.execute(query_use_item)
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Item used"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 #PEGA INVENTARIO
 @app.route('/api/get_items_inventory_by_type/<username>/<item_type>', methods=['GET'])
 def get_items_by_type_from_inventory(username, item_type):
