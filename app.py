@@ -128,7 +128,7 @@ def register():
                 "id": 0,
                 "username": username,
                 "password": password,
-                "icon": "",
+                "icon": "0",
                 "coins": 300,
                 "level": 1,
                 "xp": 0,
