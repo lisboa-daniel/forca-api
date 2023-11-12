@@ -137,9 +137,9 @@ def register():
                 "item3": "sopa",
                 "character": {
                     "color": "azul",
-                    "accessory": "",
-                    "top": "",
-                    "bottom": ""
+                    "accessory": "default_acessory",
+                    "top": "default_top",
+                    "bottom": "default_bottom"
                     }
                 }
             
