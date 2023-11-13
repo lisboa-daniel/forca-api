@@ -516,6 +516,8 @@ def inventory_create():
     data = request.get_json()
     username = data['username']
     item_name = data['item_name']
+    coins = data['coins']
+    
     user_id_select_query = f"""SELECT id
                                FROM tb_user 
                                WHERE username = '{username}' 
@@ -524,32 +526,52 @@ def inventory_create():
                                FROM tb_item 
                                WHERE name = '{item_name}' 
                             """
-    coins = data['coins']
     
     query_coins = f"""UPDATE tb_user 
-                SET coins = {coins}
-                WHERE username = '{username}'"""
-            
+                      SET coins = {coins}
+                      WHERE username = '{username}'"""
+    
     try:
+        # Get user and item IDs
         cursor.execute(user_id_select_query)
         user_id = str(cursor.fetchone()).strip("(),")
         cursor.execute(item_id_select_query)
         item_id = str(cursor.fetchone()).strip("(),")
         
-        insert_query = f""" INSERT INTO tb_inventory (user_id,
-                                                item_id,
-                                                amount
-                                                )
-                        VALUES ('{user_id}', '{item_id}', 1)
-                    """
+        # Check if the item already exists in the user's inventory
+        check_inventory_query = f"""SELECT id
+                                    FROM tb_inventory 
+                                    WHERE user_id = '{user_id}' 
+                                      AND item_id = '{item_id}' 
+                                 """
+        cursor.execute(check_inventory_query)
+        existing_inventory_id = cursor.fetchone()
+
+        # If the item already exists, delete it
+        if existing_inventory_id:
+            delete_existing_query = f"""DELETE FROM tb_inventory
+                                        WHERE id = {existing_inventory_id[0]}
+                                     """
+            cursor.execute(delete_existing_query)
         
-        cursor.execute(insert_query)
+        # Insert the new item into the inventory
+        insert_query = f""" INSERT INTO tb_inventory (user_id,
+                                                      item_id,
+                                                      amount
+                                                    )
+                            VALUES ('{user_id}', '{item_id}', 1)
+                        """
+        
+        # Update the user's coins
         cursor.execute(query_coins)
+        
+        # Commit the changes to the database
         conn.commit()
- 
-        return jsonify({"message":"Inventory created"}), 201
+
+        return jsonify({"message": "Inventory created"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/api/add_item', methods=['POST'])
