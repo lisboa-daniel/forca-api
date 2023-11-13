@@ -561,7 +561,7 @@ def inventory_create():
                                                     )
                             VALUES ('{user_id}', '{item_id}', 1)
                         """
-        
+        cursor.execute(insert_query)
         # Update the user's coins
         cursor.execute(query_coins)
         
