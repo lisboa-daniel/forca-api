@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import psycopg2
 import json
 
@@ -785,6 +785,11 @@ def get_item_from_inventory(username, item_name):
         cursor.close()
         return jsonify({"error": str(e)}), 500
 
+
+# PAGINAS DO SITE
+@app.route('/compra/<username>/<item_name>', methods=['GET'])
+def pagina_compra(username, item_name):
+    return render_template('compra.html', username=username, item_name=item_name)
 
 
 if __name__ == '__main__':

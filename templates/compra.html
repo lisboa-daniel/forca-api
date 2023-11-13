@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch POST Form Example</title>
+</head>
+<body>
+
+<form id="myForm">
+  <label for="example1">Example 1:</label>
+  <input type="text" id="example1" name="example1" required>
+
+  <label for="example2">Example 2:</label>
+  <input type="text" id="example2" name="example2" required>
+
+  <button type="button" onclick="postData()">Submit</button>
+</form>
+
+<script>
+  function postData() {
+    const url = 'https://forca.azurewebsites.net/api/create_inventory';
+    const data = {
+        
+            "username": "Dandy",
+            "item_name": "Lapiseira",
+            "coins": 5000
+        
+    };
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any other headers if needed
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(responseData => console.log(responseData))
+      .catch(error => console.error('Error:', error));
+  }
+</script>
+
+</body>
+</html>
