@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import psycopg2
 import json
+import base64
 
 app = Flask(__name__)
 DATABASE_URL = "postgres://forca.fatec:Cwoy8X5OfSnM@ep-morning-glitter-99273928.us-east-2.aws.neon.tech/neondb?options=endpoint%3Dep-morning-glitter-99273928&sslmode=require"
@@ -295,6 +296,67 @@ def get_userbynick(username):
     else:
         # If the user doesn't exist, return an appropriate error message
         return jsonify({"error": "User not found"})
+
+
+
+    
+
+def insert_image_bytes(image_bytes, image_name):
+    
+    try:
+       
+        return True
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+
+@app.route('/api/insertimage', methods=['POST'])
+def insert_image():
+    try:
+        # Assuming the image bytes are sent in the request body as a base64-encoded string
+        data = request.get_json()
+        image_bytes_base64 = data.get('image_base64', '')  # Update to 'image_base64'
+        image_bytes = base64.b64decode(image_bytes_base64)  # Decode base64 to bytes
+
+        image_name = data.get('image_name', 'default_image_name')  # Provide a default name if not provided
+
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO tb_image (image_bytes, image_name) VALUES (?, ?)", (image_bytes, image_name))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": "Image inserted successfully"})
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
+
+    
+
+@app.route('/api/getimage', methods=['GET'])
+def get_image():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tb_image")
+    item = cursor.fetchone()
+
+
+    # Check if the user exists
+    if item:
+        image = {
+            "id": item[0],
+            "image_bytes": base64.b64encode(item[1]).decode('utf-8')
+,
+            "image_name": item[2]
+        }
+         
+        conn.close()
+        # Return the user as JSON
+        return jsonify(image)
+    else:
+        # If the user doesn't exist, return an appropriate error message
+        return jsonify({"error": "User not found"})
+
+
+
 
 # INFO PERSONAGEM
 # Character Methods
