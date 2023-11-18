@@ -941,16 +941,20 @@ def get_consumable_item():
         # Perform the JOIN operation
         cursor.execute("""
             SELECT
+                tb_item.id,
                 tb_item.name,
                 tb_item.description,
-                tb_item_effect.id,
-                tb_item_effect.id_item,
+                tb_item.icon,
+                tb_item_effect.type_class,
+                tb_item_effect.type_effect,
                 tb_item_effect.effect_amount,
-                tb_item_effect.type
+                tb_item_effect.target
+                
+                
             FROM
                 tb_item
             JOIN
-                tb_item_effect ON tb_item.id = tb_item_effect.id_item
+                tb_item_effect ON tb_item.id = tb_item_effect.item_id
         """)
 
         items = cursor.fetchall()
@@ -960,12 +964,15 @@ def get_consumable_item():
         results = []
         for item in items:
             result = {
-                "name": item[0],
-                "description": item[1],
-                "id": item[2],
-                "id_item": item[3],
-                "effect_amount": item[4],
-                "type": item[5]
+                "item_id": item[0],
+                "item_name": item[1],
+                "description": item[2],
+                "icon": item[3],
+                "type_class": item[4],
+                "type_effect": item[5],
+                "effect_amount": item[6],
+                "target": item[7]
+                
             }
             results.append(result)
 
