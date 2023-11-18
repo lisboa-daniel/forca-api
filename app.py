@@ -932,6 +932,49 @@ def get_effects():
         return jsonify({"error": f"An error occurred: {e}"})
 
 
+@app.route('/api/get_consumable_item', methods=['GET'])
+def get_consumable_item():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+
+        # Perform the JOIN operation
+        cursor.execute("""
+            SELECT
+                tb_item.name,
+                tb_item.description,
+                tb_item_effect.id,
+                tb_item_effect.id_item,
+                tb_item_effect.effect_amount,
+                tb_item_effect.type
+            FROM
+                tb_item
+            JOIN
+                tb_item_effect ON tb_item.id = tb_item_effect.id_item
+        """)
+
+        items = cursor.fetchall()
+        conn.close()
+
+        # Convert to objects
+        results = []
+        for item in items:
+            result = {
+                "name": item[0],
+                "description": item[1],
+                "id": item[2],
+                "id_item": item[3],
+                "effect_amount": item[4],
+                "type": item[5]
+            }
+            results.append(result)
+
+        # Return as JSON
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
+
+
 
 @app.route('/api/words_by_category/<category_name>', methods=['GET'])
 def get_words_by_category(category_name):
