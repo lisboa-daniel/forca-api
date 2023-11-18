@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 import psycopg2
+from psycopg2 import sql
 import json
 import base64
 
@@ -301,56 +302,56 @@ def get_userbynick(username):
 
     
 
-def insert_image_bytes(image_bytes, image_name):
-    
-    try:
-       
-        return True
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
-
 @app.route('/api/insertimage', methods=['POST'])
 def insert_image():
     try:
-        # Assuming the image bytes are sent in the request body as a base64-encoded string
-        data = request.get_json()
-        image_bytes_base64 = data.get('image_base64', '')  # Update to 'image_base64'
-        image_bytes = base64.b64decode(image_bytes_base64)  # Decode base64 to bytes
-
-        image_name = data.get('image_name', 'default_image_name')  # Provide a default name if not provided
-
+        # Connect to the database
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO tb_image (image_bytes, image_name) VALUES (?, ?)", (image_bytes, image_name))
+
+        # Get the file from the request
+        file = request.files['file']
+        
+        # Read the bytes from the file
+        image_bytes = file.read()
+
+        # Get the file name
+        image_name = file.filename
+
+        # Insert the data into the database
+        cursor.execute(sql.SQL("INSERT INTO tb_image (image_bytes, image_name) VALUES (%s, %s)"), (psycopg2.Binary(image_bytes), image_name))
+        
+        # Commit the transaction
         conn.commit()
+
+        # Close the database connection
         conn.close()
+
         return jsonify({"success": "Image inserted successfully"})
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"})
 
     
 
-@app.route('/api/getimage', methods=['GET'])
-def get_image():
+@app.route('/api/getimages', methods=['GET'])
+def get_images():
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM tb_image")
-    item = cursor.fetchone()
-
-
-    # Check if the user exists
-    if item:
-        image = {
-            "id": item[0],
-            "image_bytes": base64.b64encode(item[1]).decode('utf-8')
-,
-            "image_name": item[2]
-        }
-         
+    items = cursor.fetchall()
+    images = []   
+    if items:
+        for item in items:
+            image = {
+                "id": item[0],
+                "image_bytes": base64.b64encode(item[1]).decode('utf-8'),
+                "image_name": item[2]
+            }
+            images.add(image);
+       
         conn.close()
         # Return the user as JSON
-        return jsonify(image)
+        return jsonify(images)
     else:
         # If the user doesn't exist, return an appropriate error message
         return jsonify({"error": "User not found"})
@@ -847,6 +848,90 @@ def get_item_from_inventory(username, item_name):
         cursor.close()
         return jsonify({"error": str(e)}), 500
 
+
+
+# WORDS
+@app.route('/api/get_categories', methods=['GET'])
+def get_categories():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM tb_word_category")
+        items = cursor.fetchall()
+        conn.close()
+
+        # Convert to objects
+        categories = []
+        for item in items:
+            category = {
+                "id": item[0],
+                "category": item[1]
+            }
+            categories.append(category)
+
+        # Return as JSON
+        return jsonify(categories)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
+
+
+@app.route('/api/get_words', methods=['GET'])
+def get_words():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM tb_word_data")
+        items = cursor.fetchall()
+        conn.close()
+
+        # Convert to objects
+        word_data = []
+        for item in items:
+            data = {
+                "id": item[0],
+                "category_id": item[1],
+                "word": item[2]
+            }
+            word_data.append(data)
+
+        # Return as JSON
+        return jsonify(word_data)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
+
+
+@app.route('/api/words_by_category/<category_name>', methods=['GET'])
+def get_words_by_category(category_name):
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+
+        # Find category_id based on category_name
+        cursor.execute("SELECT id FROM tb_word_category WHERE category = %s", (category_name,))
+        category_id = cursor.fetchone()
+
+        if category_id:
+            # Retrieve words for the specified category
+            cursor.execute("SELECT * FROM tb_word_data WHERE category_id = %s", (category_id[0],))
+            items = cursor.fetchall()
+            conn.close()
+
+            # Convert to objects
+            word_data = []
+            for item in items:
+                data = {
+                    "id": item[0],
+                    "category_id": item[1],
+                    "word": item[2]
+                }
+                word_data.append(data)
+
+            # Return as JSON
+            return jsonify(word_data)
+        else:
+            return jsonify({"error": f"Category not found: {category_name}"})
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
 
 # PAGINAS DO SITE
 @app.route('/compra/<username>/<item_name>', methods=['GET'])
