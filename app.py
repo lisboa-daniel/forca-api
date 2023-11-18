@@ -342,12 +342,14 @@ def get_images():
     images = []   
     if items:
         for item in items:
+            
+        
             image = {
                 "id": item[0],
-                "image_bytes": base64.b64encode(item[1]).decode('utf-8'),
+                "image_bytes": base64.b64encode(bytes.fromhex(str(item[1])[2:])).decode('utf-8'),
                 "image_name": item[2]
             }
-            images.add(image);
+            images.append(image);
        
         conn.close()
         # Return the user as JSON
@@ -933,6 +935,41 @@ def get_words_by_category(category_name):
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"})
 
+
+@app.route('/api/get_word_data', methods=['GET'])
+def get_word_data():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+
+        # Get all categories
+        cursor.execute("SELECT id, category FROM tb_word_category")
+        categories = cursor.fetchall()
+
+        # Initialize the result array
+        result = []
+
+        # Iterate through categories
+        for category in categories:
+            # Retrieve words for the current category
+            cursor.execute("SELECT word FROM tb_word_data WHERE category_id = %s", (category[0],))
+            words = [item[0] for item in cursor.fetchall()]
+
+            # Create the result object
+            result_object = {
+                "category_name": category[1],
+                "word_data": words
+            }
+
+            # Append the result object to the result array
+            result.append(result_object)
+
+        conn.close()
+
+        # Return as JSON
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
 # PAGINAS DO SITE
 @app.route('/compra/<username>/<item_name>', methods=['GET'])
 def pagina_compra(username, item_name):
