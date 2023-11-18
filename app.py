@@ -342,11 +342,11 @@ def get_images():
     images = []   
     if items:
         for item in items:
-            
         
+            
             image = {
                 "id": item[0],
-                "image_bytes": base64.b64encode(bytes.fromhex(str(item[1])[2:])).decode('utf-8'),
+                "image_bytes": base64.b64encode(item[1]).decode('utf-8'),
                 "image_name": item[2]
             }
             images.append(image);
@@ -900,6 +900,37 @@ def get_words():
         return jsonify(word_data)
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"})
+
+
+
+
+# item effects
+
+@app.route('/api/get_effects', methods=['GET'])
+def get_effects():
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM tb_item_effect")
+        items = cursor.fetchall()
+        conn.close()
+
+        # Convert to objects
+        effects = []
+        for item in items:
+            effect = {
+                "id": item[0],
+                "id_item": item[1],
+                "effect_amount": item[2],
+                "type": item[3]
+            }
+            effects.append(effect)
+
+        # Return as JSON
+        return jsonify(effects)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"})
+
 
 
 @app.route('/api/words_by_category/<category_name>', methods=['GET'])
