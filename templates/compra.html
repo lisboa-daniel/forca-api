@@ -17,30 +17,7 @@
   <button type="button" onclick="postData()">Submit</button>
 </form>
 
-<script>
-  function postData() {
-    const url = 'https://forca.azurewebsites.net/api/create_inventory';
-    const data = {
-        
-            "username": "Dandy",
-            "item_name": "Lapiseira",
-            "coins": 5000
-        
-    };
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any other headers if needed
-      },
-      body: JSON.stringify(data),
-    })
-      .then(response => response.json())
-      .then(responseData => console.log(responseData))
-      .catch(error => console.error('Error:', error));
-  }
-</script>
 
 </body>
 </html>

@@ -554,8 +554,7 @@ def get_costume_inventory(username):
         return jsonify({"error": str(e)}), 500
 
 
-
-@app.route('/api/coin_update', methods=['POST'])
+@app.route('/api/coin_add', methods=['POST'])
 def coin_increment():
     conn = connect_db()
     cursor = conn.cursor()
@@ -563,16 +562,15 @@ def coin_increment():
     username = data['username']
     amount = data['amount']
     query = f"""UPDATE tb_user 
-                SET coins = {amount}
+                SET coins = coins + {amount}
                 WHERE username = '{username}'
             """
     try:
         cursor.execute(query)
         conn.commit()
-        return jsonify({"message": "Coins updated to"+ str(amount)})       
+        return jsonify({"message": "Coins added: "+ str(amount)})       
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/api/create_inventory', methods=['POST'])
 def inventory_create():
@@ -1051,10 +1049,22 @@ def get_word_data():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"})
+    
+@app.route('/novecentos', methods=['GET'])
+def pagina_compra2():
+    return render_template('novecentos.html')    
+    
 # PAGINAS DO SITE
-@app.route('/compra/<username>/<item_name>', methods=['GET'])
-def pagina_compra(username, item_name):
-    return render_template('compra.html', username=username, item_name=item_name)
+@app.route('/compra/<username>/<item_name>/<package>', methods=['GET'])
+def pagina_compra(username, item_name, package):
+    data = {
+        'username': username,
+        'item_name': item_name,
+        'package': package
+    }
+    return render_template('detalhe_compra.html', data=data, package_nice_name=package)
+
+
 
 
 if __name__ == '__main__':
