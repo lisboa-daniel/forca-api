@@ -559,16 +559,16 @@ def coin_increment():
     conn = connect_db()
     cursor = conn.cursor()
     data = request.get_json()
-    username = data['username']
+    username = data['username'].lower()  # Convert the provided username to lowercase
     amount = data['amount']
     query = f"""UPDATE tb_user 
                 SET coins = coins + {amount}
-                WHERE username = '{username}'
+                WHERE LOWER(username) = '{username}'
             """
     try:
         cursor.execute(query)
         conn.commit()
-        return jsonify({"message": "Coins added: "+ str(amount)})       
+        return jsonify({"message": "Coins added: " + str(amount)})       
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
