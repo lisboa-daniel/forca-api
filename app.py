@@ -1055,11 +1055,10 @@ def pagina_compra2():
     return render_template('novecentos.html')    
     
 # PAGINAS DO SITE
-@app.route('/compra/<username>/<item_name>/<package>', methods=['GET'])
-def pagina_compra(username, item_name, package):
+@app.route('/compra/<username>/<package>', methods=['GET'])
+def pagina_compra(username, package):
     data = {
         'username': username,
-        'item_name': item_name,
         'package': package
     }
     return render_template('detalhe_compra.html', data=data, package_nice_name=package)

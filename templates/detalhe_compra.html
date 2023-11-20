@@ -15,14 +15,16 @@
     <div class="mt-3 container align-items-center justify-content-center borda">
         <div class="row">
 
-            <div class="p-2 col-md-5 bg d-flex align-items-center justify-content-center">
-                <img src="assets/money900.png" alt="900 moedas">
-            </div>
+          <div class="p-2 col-md-5 bg d-flex align-items-center justify-content-center">
+            <img src="{{ url_for('static', filename='images/money' + package_nice_name + '.png') }}" alt="{{ package_nice_name }} moedas">
+        </div>
+        
 
             <div class="p-2 col-md-7 h-100">
                 <div class="col d-flex justify-content-end titulo">{{ package_nice_name}} Moedas</div>
                 <div class="col d-flex justify-content-end">Pacote com {{ package_nice_name}} moedas para utilização na loja do jogo</div>
-                <div class="col d-flex justify-content-end preco">R$ <div id="preco">26.00</div></div>
+                <div class="col d-flex justify-content-end preco">R$ <div id="preco"></div></div>
+
                 
                 <div class="d-flex bd-highlight mb-3 total">
                   <div class="me-auto p-2 bd-highlight">Total:</div>
@@ -34,7 +36,7 @@
                     <div class="col justify-content-start">
                       <div class="input-group ">
                         
-                        <input id="qtd" type="number" class="form-control centralizar" aria-label="Quantidade de pacotes de moedas" min="1" max="99" value="1">
+                        <input id="qtd" type="number" class="form-control centralizar" aria-label="Quantidade de pacotes de moedas" min="1" max="1" value="1">
                       </div>
                     
 
@@ -50,6 +52,28 @@
 
     <script>
       var data = {{ data | tojson | safe }};
+      var quantity = parseInt(data.package);  // Change this value based on your logic or user input
+
+      // Switch case to determine the price based on the quantity
+      var price;
+      switch (quantity) {
+          case 300:
+              price = 5.00;
+              break;
+          case 600:
+              price = 12.00;
+              break;
+          case 900:
+              price = 18.00;
+              break;
+          default:
+              price = 0.00;  // Default value if the quantity doesn't match any case
+      }
+  
+      // Update the content of the 'preco' div with the calculated price
+      document.getElementById('preco').innerText = price.toFixed(2);
+
+      
       
       var preco = document.getElementById('preco').innerText;
       total.innerText = preco;
@@ -64,7 +88,7 @@
         const url = 'https://forca.azurewebsites.net/api/coin_add';
         const postData = {
             "username": data.username,
-            "amount": qtd * data.package
+            "amount": parseInt(qtd.value) * parseInt(data.package)
         };
   
         fetch(url, {
@@ -74,8 +98,10 @@
           },
           body: JSON.stringify(postData),
         })
+          
           .then(response => response.json())
           .then(responseData => console.log(responseData))
+          .then(window.close())
           .catch(error => console.error('Error:', error));
       }
   </script>
