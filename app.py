@@ -575,6 +575,27 @@ def get_costume_inventory(username):
         return jsonify({"error": str(e)}), 500
 
 
+
+@app.route('/api/coin_update', methods=['POST'])
+def coin_increment():
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = request.get_json()
+    username = data['username'].lower()  # Convert the provided username to lowercase
+    amount = data['amount']
+    query = f"""UPDATE tb_user 
+                SET coins = {amount}
+                WHERE LOWER(username) = '{username}'
+            """
+    try:
+        cursor.execute(query)
+        conn.commit()
+        return jsonify({"message": "Coins added: " + str(amount)})       
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 @app.route('/api/coin_add', methods=['POST'])
 def coin_increment():
     conn = connect_db()
