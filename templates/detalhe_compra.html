@@ -101,9 +101,14 @@
           
           .then(response => response.json())
           .then(responseData => console.log(responseData))
-          
+          .then(setTimeout(closed, 1500))
           .catch(error => console.error('Error:', error));
       }
+
+      function closed() {
+        window.close();
+      }
+
   </script>
   
 
