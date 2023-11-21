@@ -577,7 +577,7 @@ def get_costume_inventory(username):
 
 
 @app.route('/api/coin_update', methods=['POST'])
-def coin_increment():
+def coin_update():
     conn = connect_db()
     cursor = conn.cursor()
     data = request.get_json()
