@@ -298,7 +298,28 @@ def get_userbynick(username):
         # If the user doesn't exist, return an appropriate error message
         return jsonify({"error": "User not found"})
 
+@app.route('/api/getusercoin/<string:username>', methods=['GET'])
+def get_coins(username):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT coins FROM tb_user WHERE username=%s", (username,))
+    item = cursor.fetchone()
 
+
+    # Check if the user exists
+    if item:
+        coins = {
+            "coins": item[0]
+        }
+        cursor.execute("SELECT color,accessory,top,bottom FROM tb_character WHERE username=%s", (username,))
+        item =  cursor.fetchone();
+        
+        conn.close()
+        # Return the user as JSON
+        return jsonify(coins)
+    else:
+        # If the user doesn't exist, return an appropriate error message
+        return jsonify({"error": "User not found"})
 
     
 
