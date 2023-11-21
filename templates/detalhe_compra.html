@@ -90,7 +90,7 @@
             "username": data.username,
             "amount": parseInt(qtd.value) * parseInt(data.package)
         };
-  
+        document.getElementById('cmp').innerHTML = "Carregando";
         fetch(url, {
           method: 'POST',
           headers: {
@@ -206,7 +206,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="botao-secundario botao-texto" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="botao botao-texto" onclick="postData()">Concluir</button>
+        <button id="cmp" type="button" class="botao botao-texto" onclick="postData()">Concluir</button>
       </div>
     </div>
   </div>
